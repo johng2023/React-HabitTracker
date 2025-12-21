@@ -13,7 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Bitch ass");
+  res.send("Helloooo");
 });
 
 app.listen(port, () => {
