@@ -4,6 +4,7 @@ import { connectDB } from "./config/db.js";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import User from "./models/User.js";
+import Habit from "./models/Habit.js";
 
 const app = express();
 const port = process.env.PORT;
@@ -82,6 +83,52 @@ app.post("/api/auth/login", async (req, res) => {
       message: error.message,
     });
   }
+});
+
+app.post("/api/createhabit", async (req, res) => {
+  try {
+    const { title, description, color, habitCreator } = req.body;
+
+    if (!title || !habitCreator) {
+      return res.json("Missing fields");
+    }
+
+    const habit = await Habit.create({
+      title,
+      description,
+      color,
+      habitCreator,
+    });
+
+    return res.json({
+      message: "New habit created",
+      habit,
+    });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+});
+
+app.get("/api/habits", async (req, res) => {
+  try {
+    const { habitCreator } = req.body;
+    const habits = await Habit.findOne({ habitCreator });
+
+    if (!habits) {
+      return res.json({ message: "No habits created yet" });
+    }
+
+    return res.json(habits);
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+});
+
+app.patch("/api/updatehabit", async (req, res) => {});
+
+app.delete("/api/deletehabit", async (req, res) => {
+  try {
+  } catch (error) {}
 });
 
 app.listen(port, () => {
