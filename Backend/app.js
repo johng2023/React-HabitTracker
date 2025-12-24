@@ -3,8 +3,11 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import "dotenv/config";
 import bcrypt from "bcrypt";
+import verifyUser from "./JWT.js";
+import jwt from "jsonwebtoken";
 import User from "./models/User.js";
 import Habit from "./models/Habit.js";
+import Completion from "./models/Completion.js";
 
 const app = express();
 const port = process.env.PORT;
@@ -40,8 +43,13 @@ app.post("/api/auth/register", async (req, res) => {
       password: hashedPassword,
     });
 
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
     return res.json({
       message: "User created",
+      token,
       user: {
         _id: user._id,
         userName: user.userName,
@@ -75,9 +83,11 @@ app.post("/api/auth/login", async (req, res) => {
       });
     }
 
-    return res.json({
-      message: "Login Success",
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
     });
+
+    return res.json({ token, message: "Login Success" });
   } catch (error) {
     return res.json({
       message: error.message,
@@ -85,7 +95,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-app.post("/api/createhabit", async (req, res) => {
+app.post("/api/create", verifyUser, async (req, res) => {
   try {
     const { title, description, color, habitCreator } = req.body;
 
@@ -97,7 +107,7 @@ app.post("/api/createhabit", async (req, res) => {
       title,
       description,
       color,
-      habitCreator,
+      habitCreator: req.userId,
     });
 
     return res.json({
@@ -109,13 +119,12 @@ app.post("/api/createhabit", async (req, res) => {
   }
 });
 
-app.get("/api/habits", async (req, res) => {
+app.get("/api/habits", verifyUser, async (req, res) => {
   try {
-    const { habitCreator } = req.body;
-    const habits = await Habit.findOne({ habitCreator });
+    const habits = await Habit.find({ habitCreator: req.userId });
 
-    if (!habits) {
-      return res.json({ message: "No habits created yet" });
+    if (habits.length === 0) {
+      return res.json({ message: "No habits exist" });
     }
 
     return res.json(habits);
@@ -124,11 +133,138 @@ app.get("/api/habits", async (req, res) => {
   }
 });
 
-app.patch("/api/updatehabit", async (req, res) => {});
-
-app.delete("/api/deletehabit", async (req, res) => {
+app.patch("/api/update", verifyUser, async (req, res) => {
   try {
-  } catch (error) {}
+    const { id, title, description, color } = req.body;
+    const habit = await Habit.findOne({ _id: id, habitCreator: req.userId });
+
+    if (!habit) {
+      return res.json({
+        message: "No habits with that ID",
+      });
+    }
+
+    habit.title = title;
+    habit.description = description;
+    habit.color = color;
+
+    await habit.save();
+
+    return res.json({ message: "Habit successfully updated" });
+  } catch (error) {
+    return res.json({
+      message: error.message,
+    });
+  }
+});
+
+app.delete("/api/delete", verifyUser, async (req, res) => {
+  try {
+    const { id } = req.body;
+    const habits = await Habit.findByOne({ _id: id, habitCreator: req.userId });
+
+    if (!habits) {
+      return res.json({ message: "No habits deleted" });
+    }
+
+    await Habit.deleteOne({ _id: id });
+    return res.json({ message: "Habit deleted successfully" });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+});
+
+//Completion Routes
+
+app.post("/api/completions/toggle", verifyUser, async (req, res) => {
+  try {
+    const { habitId, date } = req.body;
+
+    if (!habitId || !date) {
+      return res.json({ message: "Missing inputs" });
+    }
+
+    const existingCompletion = await Completion.findOne({
+      habitId,
+      completedDate: date,
+    });
+
+    if (existingCompletion) {
+      await Completion.deleteOne({ _id: existingCompletion._id });
+      return res.json({ message: "Completion removed", completed: false });
+    }
+
+    const completion = await Completion.create({
+      habitId,
+      userId: req.userId,
+      completedDate: date,
+    });
+    return res.json({
+      message: "Completion successful",
+      completed: true,
+      completion,
+    });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+});
+
+app.get("/api/completions/:habitId", verifyUser, async (req, res) => {
+  try {
+    const { habitId } = req.params;
+
+    const completions = await Completion.find({ habitId }).sort({
+      completedDate: -1,
+    });
+
+    return res.json({ completions });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
+});
+
+app.get("/api/completions/:habitId/stats", verifyUser, async (req, res) => {
+  try {
+    const { habitId } = req.params;
+
+    const completions = await Completion.find({ habitId }).sort({
+      completedDate: -1,
+    });
+
+    if (completions.length === 0) {
+      return res.json({
+        totalCompletions: 0,
+        currentStreak: 0,
+      });
+    }
+
+    let currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < completions.length; i++) {
+      const completionDate = new Date(completions[i].completedDate);
+      completionDate.setHours(0, 0, 0, 0);
+
+      const expectedDate = new Date(today);
+      expectedDate.setDate(expectedDate.getDate() - i);
+
+      if (completionDate.getTime() === expectedDate.getTime()) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+
+    const totalCompletions = completions.length;
+
+    return res.json({
+      totalCompletions,
+      currentStreak,
+    });
+  } catch (error) {
+    return res.json({ message: error.message });
+  }
 });
 
 app.listen(port, () => {

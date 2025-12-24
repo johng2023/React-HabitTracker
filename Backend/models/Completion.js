@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 const completionSchema = new Schema(
   {
-    habitID: {
+    habitId: {
       type: Schema.Types.ObjectId,
       ref: "Habit",
       required: true,
