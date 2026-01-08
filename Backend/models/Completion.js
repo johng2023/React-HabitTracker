@@ -7,7 +7,7 @@ const completionSchema = new Schema(
       ref: "Habit",
       required: true,
     },
-    userID: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -20,7 +20,10 @@ const completionSchema = new Schema(
   { timestamps: true }
 );
 
-completionSchema.index({ habitID: 1, completedDate: 1 }, { unique: true });
+completionSchema.index(
+  { habitId: 1, userId: 1, completedDate: 1 },
+  { unique: true }
+);
 
 const Completion = model("Completion", completionSchema);
 export default Completion;

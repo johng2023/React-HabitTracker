@@ -1,19 +1,31 @@
 import axios from "axios";
 import Input from "./Input";
+import { useNavigate } from "react-router-dom";
 
 const BASE_URL = "http://localhost:3000";
 
 export default function Register({ toggleRegister }) {
+  const navigate = useNavigate();
+
   async function userRegister(formData) {
     const loginData = Object.fromEntries(formData.entries());
 
-    const response = await axios.post(`${BASE_URL}/api/auth/register`, {
-      name: loginData.username,
-      email: loginData.email,
-      password: loginData.password,
-    });
+    try {
+      const response = await axios.post(`${BASE_URL}/api/auth/register`, {
+        name: loginData.username,
+        email: loginData.email,
+        password: loginData.password,
+      });
 
-    console.log(response.data);
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        navigate("/habits");
+      }
+
+      console.log(response.data.message);
+    } catch (error) {
+      console.error("Failed to register", error.message);
+    }
   }
 
   return (

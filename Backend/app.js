@@ -17,10 +17,6 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send({ message: "Api is running" });
-});
-
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -97,9 +93,9 @@ app.post("/api/auth/login", async (req, res) => {
 
 app.post("/api/create", verifyUser, async (req, res) => {
   try {
-    const { title, description, color, habitCreator } = req.body;
+    const { title, description, color } = req.body;
 
-    if (!title || !habitCreator) {
+    if (!title) {
       return res.json("Missing fields");
     }
 
@@ -161,7 +157,7 @@ app.patch("/api/update", verifyUser, async (req, res) => {
 app.delete("/api/delete", verifyUser, async (req, res) => {
   try {
     const { id } = req.body;
-    const habits = await Habit.findByOne({ _id: id, habitCreator: req.userId });
+    const habits = await Habit.findOne({ _id: id, habitCreator: req.userId });
 
     if (!habits) {
       return res.json({ message: "No habits deleted" });
@@ -186,6 +182,7 @@ app.post("/api/completions/toggle", verifyUser, async (req, res) => {
 
     const existingCompletion = await Completion.findOne({
       habitId,
+      userId: req.userId,
       completedDate: date,
     });
 
@@ -213,7 +210,10 @@ app.get("/api/completions/:habitId", verifyUser, async (req, res) => {
   try {
     const { habitId } = req.params;
 
-    const completions = await Completion.find({ habitId }).sort({
+    const completions = await Completion.find({
+      habitId,
+      userId: req.userId,
+    }).sort({
       completedDate: -1,
     });
 
@@ -227,7 +227,10 @@ app.get("/api/completions/:habitId/stats", verifyUser, async (req, res) => {
   try {
     const { habitId } = req.params;
 
-    const completions = await Completion.find({ habitId }).sort({
+    const completions = await Completion.find({
+      habitId,
+      userId: req.userId,
+    }).sort({
       completedDate: -1,
     });
 

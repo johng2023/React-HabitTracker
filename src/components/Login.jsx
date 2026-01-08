@@ -1,18 +1,29 @@
 import axios from "axios";
 import Input from "./Input";
+import { useNavigate } from "react-router-dom";
 
 const BASE_URL = "http://localhost:3000";
 
 export default function Login({ toggleRegister }) {
+  const navigate = useNavigate();
+
   async function userLogin(formData) {
     const loginData = Object.fromEntries(formData.entries());
+    try {
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, {
+        email: loginData.email,
+        password: loginData.password,
+      });
 
-    const response = await axios.post(`${BASE_URL}/api/auth/login`, {
-      email: loginData.email,
-      password: loginData.password,
-    });
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        navigate("/habits");
+      }
 
-    localStorage.setItem("token", response.data.token);
+      console.log(response.data.message);
+    } catch (error) {
+      console.error("Login failed", error.message);
+    }
   }
 
   return (
