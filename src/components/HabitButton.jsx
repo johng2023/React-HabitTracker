@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 import ModalForm from "./ModalForm";
 
-export default function HabitButton({ toggleModal, showModal }) {
+export default function HabitButton({ toggleModal, showModal, editHabit }) {
   return (
     <>
       <button
@@ -13,7 +13,10 @@ export default function HabitButton({ toggleModal, showModal }) {
 
       {showModal &&
         createPortal(
-          <ModalForm toggleModal={toggleModal}></ModalForm>,
+          <ModalForm
+            toggleModal={toggleModal}
+            editHabit={editHabit}
+          ></ModalForm>,
           document.getElementById("modal")
         )}
     </>

@@ -2,17 +2,26 @@ import { useContext } from "react";
 import { HabitContext } from "../store/habitContext";
 import Input from "./Input";
 
-export default function ModalForm({ toggleModal }) {
-  const { createHabit } = useContext(HabitContext);
+export default function ModalForm({ toggleModal, editHabit }) {
+  const { createHabit, updateHabit } = useContext(HabitContext);
 
-  async function handleCreateHabit(formData) {
+  async function handleSubmit(formData) {
     const habitData = Object.fromEntries(formData.entries());
 
     try {
-      await createHabit({
-        title: habitData.title,
-        description: habitData.description || "",
-      });
+      if (!editHabit) {
+        await createHabit({
+          title: habitData.title,
+          description: habitData.description || "",
+          color: habitData.color || "white",
+        });
+      } else {
+        await updateHabit(editHabit._id, {
+          title: habitData.title,
+          description: habitData.description || "",
+          color: habitData.color || "white",
+        });
+      }
 
       toggleModal();
     } catch (error) {
@@ -27,23 +36,47 @@ export default function ModalForm({ toggleModal }) {
           <h2 className="text-2xl font-bold">Create New Habit</h2>
           <button
             onClick={toggleModal}
-            className="text-gray-500 not-[]:text-2xl"
+            className="text-gray-500 text-2xl"
             type="button"
           >
             ×
           </button>
         </div>
 
-        <form action={handleCreateHabit}>
-          <Input type="text" label="Habit Title" id="title" />
-          <Input type="text" label="Description (optional)" id="description" />
+        <form action={handleSubmit}>
+          <Input
+            type="text"
+            label="Habit Title"
+            id="title"
+            required={true}
+            defaultValue={editHabit?.title || ""}
+          />
+          <Input
+            type="text"
+            label="Description (optional)"
+            id="description"
+            required={false}
+            defaultValue={editHabit?.description || ""}
+          />
+          <div className="flex flex-col mb-4">
+            <label className="mb-2 font-semibold text-left" htmlFor="color">
+              Color
+            </label>
+            <input
+              id="color"
+              name="color"
+              type="color"
+              defaultValue={editHabit?.color || "#ffffff"}
+              className="h-12 w-full"
+            />
+          </div>
 
           <div className="flex gap-3 mt-4">
             <button
               type="submit"
               className="flex-1 bg-gray-900 text-white py-3 px-4 rounded-lg font-semibold"
             >
-              Create Habit
+              {editHabit ? "Update Habit" : "Create Habit"}
             </button>
             <button
               type="button"

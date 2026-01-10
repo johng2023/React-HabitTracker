@@ -17,8 +17,9 @@ export default function Register({ toggleRegister }) {
         password: loginData.password,
       });
 
-      if (response.data.token) {
+      if (response.data.token && response.data.user) {
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("username", response.data.user.userName);
         navigate("/habits");
       }
 

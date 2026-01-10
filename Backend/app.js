@@ -83,7 +83,11 @@ app.post("/api/auth/login", async (req, res) => {
       expiresIn: "7d",
     });
 
-    return res.json({ token, message: "Login Success" });
+    return res.json({
+      token,
+      user: { _id: user._id, userName: user.userName, email: user.email },
+      message: "Login Success",
+    });
   } catch (error) {
     return res.json({
       message: error.message,
