@@ -20,10 +20,7 @@ const completionSchema = new Schema(
   { timestamps: true }
 );
 
-completionSchema.index(
-  { habitId: 1, userId: 1, completedDate: 1 },
-  { unique: true }
-);
+completionSchema.index({ habitId: 1, completedDate: 1 }, { unique: true });
 
 const Completion = model("Completion", completionSchema);
 export default Completion;
