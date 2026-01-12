@@ -4,7 +4,7 @@ import { Pen, X } from "lucide-react";
 import { axiosInstance } from "../axiosInstance";
 import { useEffect } from "react";
 
-export default function Habit({ habit, setEditHabit, toggleModal }) {
+export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
   const { removeHabit } = useContext(HabitContext);
   const [completions, setCompletions] = useState(0);
   const [loadingCompletions, setLoadingCompletions] = useState(true);
@@ -39,6 +39,11 @@ export default function Habit({ habit, setEditHabit, toggleModal }) {
     e.stopPropagation();
     setEditHabit(habit);
     toggleModal();
+  }
+
+  function handleStats(e) {
+    e.stopPropagation();
+    showStats(habit);
   }
 
   async function handleHabitClick(e) {
@@ -98,7 +103,10 @@ export default function Habit({ habit, setEditHabit, toggleModal }) {
               <span className="text-lg font-bold text-black">
                 {completions}
               </span>
-              <button className=" text-black p-1 border rounded-md">
+              <button
+                onClick={handleStats}
+                className=" text-black p-1 border rounded-md"
+              >
                 Stats
               </button>
             </div>
