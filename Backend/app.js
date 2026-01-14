@@ -14,7 +14,12 @@ const port = process.env.PORT;
 
 connectDB();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://your-frontend.onrender.com",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 app.post("/api/auth/register", async (req, res) => {
