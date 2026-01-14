@@ -10,13 +10,13 @@ export default function Register({ toggleRegister }) {
   const [message, setMessage] = useState();
 
   async function userRegister(formData) {
-    const loginData = Object.fromEntries(formData.entries());
+    const registerData = Object.fromEntries(formData.entries());
 
     try {
       const response = await axios.post(`${BASE_URL}/api/auth/register`, {
-        name: loginData.username,
-        email: loginData.email,
-        password: loginData.password,
+        name: registerData.username,
+        email: registerData.email,
+        password: registerData.password,
       });
 
       if (response.data.token && response.data.user) {
@@ -40,7 +40,12 @@ export default function Register({ toggleRegister }) {
       <form action={userRegister}>
         <Input type="text" label="Username" id="username"></Input>
         <Input type="email" label="Email" id="email"></Input>
-        <Input type="password" label="Password" id="password"></Input>
+        <Input
+          type="password"
+          label="Password"
+          id="password"
+          minlength="8"
+        ></Input>
 
         <button
           type="submit"

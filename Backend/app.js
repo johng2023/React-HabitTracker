@@ -25,6 +25,10 @@ app.post("/api/auth/register", async (req, res) => {
       return res.send({ message: "Please enter all fields" });
     }
 
+    if (password.length < 8) {
+      return res.send({ message: "Password must be at least 8 characters" });
+    }
+
     const userExists = await User.findOne({ email });
 
     if (userExists) {
