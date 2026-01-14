@@ -16,7 +16,7 @@ connectDB();
 
 app.use(
   cors({
-    origin: "https://your-frontend.onrender.com",
+    origin: "https://react-habittracker-1.onrender.com",
     credentials: true,
   })
 );
