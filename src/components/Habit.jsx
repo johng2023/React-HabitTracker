@@ -60,14 +60,13 @@ export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
         date: today,
       });
       if (response.data.completed) {
-        console.log("Habit completed for today");
+        toast.success("Habit completed for today");
       } else {
-        console.log("Habit completion removed");
+        toast.success("Habit completion removed");
       }
       await fetchCompletions();
     } catch (error) {
-      console.log(error);
-      alert(error.response?.data?.message || "failed to complete");
+      toast.error(error.response?.data?.message || "Failed to complete");
     }
   }
 

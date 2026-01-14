@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { axiosInstance } from "../axiosInstance";
 import Calendar from "./Calendar";
 import { calculateCurrentStreak } from "../streakLogic";
+import toast from "react-hot-toast";
 
 export default function StatsModal({ stats, closeStats }) {
   const [completions, setCompletions] = useState(null);
@@ -16,7 +17,7 @@ export default function StatsModal({ stats, closeStats }) {
         setCompletions(response.data.totalCompletions);
         setStreak(calculateCurrentStreak(response.data.completions));
       } catch (error) {
-        console.log(error);
+        toast.error(`Failed to Load Stats: ${error.message}`);
       }
     }
 

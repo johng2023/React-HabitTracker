@@ -38,7 +38,7 @@ export default function HabitContextProvider({ children }) {
       if (!response.data.habit) {
         setError("Habit is undefined");
       }
-      setHabits([...habits, response.data.habit]);
+      setHabits((prev) => [...prev, response.data.habit]);
     } catch (error) {
       setError(error.message);
     }
