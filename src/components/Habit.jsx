@@ -3,6 +3,7 @@ import { HabitContext } from "../store/habitContext";
 import { Pen, X } from "lucide-react";
 import { axiosInstance } from "../axiosInstance";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
   const { removeHabit } = useContext(HabitContext);
@@ -21,9 +22,8 @@ export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
         `/completions/${habit._id}/stats`
       );
       setCompletions(response.data.totalCompletions || 0);
-      console.log(response.data);
     } catch (error) {
-      console.log("Error getting completions", error);
+      toast("Error getting completions");
       setCompletions(0);
     } finally {
       setLoadingCompletions(false);
@@ -33,6 +33,7 @@ export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
   function handleDelete(e) {
     e.stopPropagation();
     removeHabit(habit._id);
+    toast.success(habit.title + " Habit Removed");
   }
 
   function handleEdit(e) {
@@ -90,7 +91,9 @@ export default function Habit({ habit, setEditHabit, toggleModal, showStats }) {
           <X size={15}></X>
         </button>
       </div>
-      <h2 className="text-xl font-semibold text-slate-900">{habit.title}</h2>
+      <h2 className="text-xl font-semibold text-slate-900 pt-2">
+        {habit.title}
+      </h2>
       {habit.description ? (
         <p className="text-sm text-black">{habit.description}</p>
       ) : null}

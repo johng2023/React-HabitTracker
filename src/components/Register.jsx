@@ -1,11 +1,13 @@
 import axios from "axios";
 import Input from "./Input";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export default function Register({ toggleRegister }) {
   const navigate = useNavigate();
+  const [message, setMessage] = useState();
 
   async function userRegister(formData) {
     const loginData = Object.fromEntries(formData.entries());
@@ -22,15 +24,19 @@ export default function Register({ toggleRegister }) {
         localStorage.setItem("username", response.data.user.userName);
         navigate("/habits");
       }
-
-      console.log(response.data.message);
+      setMessage(response.data.message);
     } catch (error) {
-      console.error("Failed to register", error.message);
+      setMessage(error.response?.data?.message || error.message);
     }
   }
 
   return (
     <div className="mt-12 mx-auto w-3/4 max-w-100">
+      {message && (
+        <p className="border border-red-600 rounded text-red-600 font-bold p-2 mb-3 text-center">
+          {message}
+        </p>
+      )}
       <form action={userRegister}>
         <Input type="text" label="Username" id="username"></Input>
         <Input type="email" label="Email" id="email"></Input>

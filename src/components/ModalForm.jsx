@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { HabitContext } from "../store/habitContext";
 import Input from "./Input";
+import toast from "react-hot-toast";
 
 export default function ModalForm({ toggleModal, editHabit }) {
   const { createHabit, updateHabit } = useContext(HabitContext);
@@ -15,17 +16,19 @@ export default function ModalForm({ toggleModal, editHabit }) {
           description: habitData.description || "",
           color: habitData.color || "white",
         });
+        toast.success("Habit Created");
       } else {
         await updateHabit(editHabit._id, {
           title: habitData.title,
           description: habitData.description || "",
           color: habitData.color || "white",
         });
+        toast.success("Habit Updated");
       }
 
       toggleModal();
     } catch (error) {
-      console.error("Failed to create habit", error);
+      toast.error("Failed to create habit");
     }
   }
 

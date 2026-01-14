@@ -75,7 +75,7 @@ app.post("/api/auth/login", async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.json({
-        message: "Passwords do not match",
+        message: "Password is incorrect",
       });
     }
 
@@ -238,36 +238,12 @@ app.get("/api/completions/:habitId/stats", verifyUser, async (req, res) => {
       completedDate: -1,
     });
 
-    if (completions.length === 0) {
-      return res.json({
-        totalCompletions: 0,
-        currentStreak: 0,
-      });
-    }
-
-    let currentStreak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < completions.length; i++) {
-      const completionDate = new Date(completions[i].completedDate);
-      completionDate.setHours(0, 0, 0, 0);
-
-      const expectedDate = new Date(today);
-      expectedDate.setDate(expectedDate.getDate() - i);
-
-      if (completionDate.getTime() === expectedDate.getTime()) {
-        currentStreak++;
-      } else {
-        break;
-      }
-    }
-
-    const totalCompletions = completions.length;
-
     return res.json({
-      totalCompletions,
-      currentStreak,
+      totalCompletions: completions.length,
+      completions: completions.map((completion) => ({
+        _id: completion._id,
+        completedDate: completion.completedDate,
+      })),
     });
   } catch (error) {
     return res.json({ message: error.message });

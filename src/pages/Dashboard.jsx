@@ -21,7 +21,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchHabits();
-  }, []);
+  }, [fetchHabits]);
 
   function signOut() {
     clearHabits();

@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { createContext, useState } from "react";
+import { createContext, useState, useCallback } from "react";
 import { axiosInstance } from "../axiosInstance";
 
 export const HabitContext = createContext({
@@ -18,11 +17,7 @@ export default function HabitContextProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [habits, setHabits] = useState([]);
 
-  useEffect(() => {
-    fetchHabits();
-  }, []);
-
-  async function fetchHabits() {
+  const fetchHabits = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -33,7 +28,7 @@ export default function HabitContextProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   async function createHabit(habit) {
     try {
@@ -44,7 +39,6 @@ export default function HabitContextProvider({ children }) {
         setError("Habit is undefined");
       }
       setHabits([...habits, response.data.habit]);
-      console.log(habits);
     } catch (error) {
       setError(error.message);
     }

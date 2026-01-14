@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../axiosInstance";
 import Calendar from "./Calendar";
+import { calculateCurrentStreak } from "../streakLogic";
 
 export default function StatsModal({ stats, closeStats }) {
   const [completions, setCompletions] = useState(null);
@@ -13,7 +14,7 @@ export default function StatsModal({ stats, closeStats }) {
           `/completions/${stats._id}/stats`
         );
         setCompletions(response.data.totalCompletions);
-        setStreak(response.data.currentStreak);
+        setStreak(calculateCurrentStreak(response.data.completions));
       } catch (error) {
         console.log(error);
       }
